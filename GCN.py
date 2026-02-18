@@ -1,7 +1,6 @@
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-from torch.autograd import Variable
 
 import numpy as np
 
@@ -9,13 +8,6 @@ import time
 
 from sklearn.utils import shuffle
 from scipy.spatial.distance import pdist, squareform
-from sklearn.utils.class_weight import compute_class_weight
-
-import matplotlib
-import matplotlib.pyplot as plt
-
-import networkx as nx
-import torch_geometric
 
 
 #@title Dataloader definitions
