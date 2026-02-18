@@ -322,10 +322,10 @@ class SequentialTSPModel(nn.Module):
 #@title Hyperparameters
 num_nodes = 10 #@param # Could also be 10, 20, or 30!
 num_neighbors = 5
-batch_size = 128
-hidden_dim = 50 #@param
-gcn_num_layers = 2
-gcn_dropout = 0.1
+batch_size = 256
+hidden_dim = 128 #@param
+gcn_num_layers = 5
+gcn_dropout = 0.15
 learning_rate = 1e-3 #@param
 max_epochs = 50 #@param
 batches_per_epoch = 10000
