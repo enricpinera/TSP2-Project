@@ -433,15 +433,12 @@ for epoch in range(config['max_epochs']):
     # Train
     train_time, train_loss = train_one_epoch(model, optimizer, config)
     train_losses.append(train_loss)
-    print(f"Epoch {epoch} | Train Loss: {train_loss:.4f}")
+    print(f"\nEpoch {epoch+1} | Train Loss: {train_loss:.4f}")
     # Validation
-    if epoch % 5 == 0 or epoch == config['max_epochs'] - 1:
-        val_loss = test(model, config, mode='val')
-        val_losses.append(val_loss)
-        print(f"Epoch {epoch} | Val Loss: {val_loss:.4f}")
-
+    val_loss = test(model, config, mode='val')
+    val_losses.append(val_loss)
+    print(f"Epoch {epoch+1} | Val Loss: {val_loss:.4f}")
     # Test
-    if epoch % 5 == 0 or epoch == config['max_epochs'] - 1:
-        test_loss = test(model, config, mode='test')
-        test_losses.append(test_loss)
-        print(f"Epoch {epoch} | Test Loss: {test_loss:.4f}\n")
+    test_loss = test(model, config, mode='test')
+    test_losses.append(test_loss)
+    print(f"Epoch {epoch+1} | Test Loss: {test_loss:.4f}")

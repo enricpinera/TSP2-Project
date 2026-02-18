@@ -3,6 +3,7 @@ import torch.nn.functional as F
 import torch.nn as nn
 
 import numpy as np
+import copy
 
 import time
 
@@ -33,7 +34,7 @@ class SequentialTSPReader(object):
         - target_next_city: int
     """
 
-    def __init__(self, num_nodes, num_neighbors, batch_size, filepath):
+    def __init__(self, num_nodes, num_neighbors, batch_size, filepath, shuffle_data=True):
         """
         Args:
             num_nodes: Number of nodes in TSP tours
@@ -45,7 +46,10 @@ class SequentialTSPReader(object):
         self.num_neighbors = num_neighbors
         self.batch_size = batch_size
         self.filepath = filepath
-        self.filedata = shuffle(open(filepath, "r").readlines())
+        with open(filepath, "r") as f:
+            self.filedata = f.readlines()
+        if shuffle_data:
+            self.filedata = shuffle(self.filedata)
         self.max_iter = len(self.filedata)  # one graph per iteration
 
     def __iter__(self):
@@ -92,7 +96,7 @@ class SequentialTSPReader(object):
         examples = []
         visited = np.zeros(self.num_nodes, dtype=np.float32)
 
-        for step in range(self.num_nodes - 2):
+        for step in range(self.num_nodes - 1):
             current = tour[step]
             next_city = tour[step + 1]
 
@@ -184,34 +188,49 @@ class GCNEncoder(nn.Module):
     GCN amb múltiples capes, residuals i pesos basats en distàncies.
     """
 
-    def __init__(self, hidden_dim, num_layers=5):
+    def __init__(self, hidden_dim, num_layers=2, num_neighbors=-1, dropout=0.1):
         super().__init__()
         self.num_layers = num_layers
+        self.num_neighbors = num_neighbors
 
         # Cada capa és una projecció lineal H → H
         self.layers = nn.ModuleList([
             nn.Linear(hidden_dim, hidden_dim) for _ in range(num_layers)
         ])
+        self.norms = nn.ModuleList([
+            nn.LayerNorm(hidden_dim) for _ in range(num_layers)
+        ])
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, node_emb, dist_matrix):
         """
         node_emb: (B, N, H)
         dist_matrix: (B, N, N)
         """
-        # Soft adjacency basada en distàncies
-        weights = torch.exp(-dist_matrix)  # (B, N, N)
+        B, N, _ = dist_matrix.shape
+        scores = -dist_matrix
+
+        # Optional k-NN sparsification (keeps nearest neighbors per node).
+        if 0 < self.num_neighbors < N:
+            k = max(1, self.num_neighbors)
+            knn_idx = torch.topk(dist_matrix, k=k, dim=-1, largest=False).indices  # (B, N, k)
+            knn_mask = torch.zeros_like(dist_matrix, dtype=torch.bool)
+            knn_mask.scatter_(dim=-1, index=knn_idx, value=True)
+            scores = scores.masked_fill(~knn_mask, float("-inf"))
+
+        # Normalize adjacency weights to keep message scale stable across nodes.
+        weights = torch.softmax(scores, dim=-1)  # (B, N, N)
 
         h = node_emb  # (B, N, H)
 
-        for layer in self.layers:
+        for layer_idx, layer in enumerate(self.layers):
             # Message passing
             agg = torch.bmm(weights, h)  # (B, N, H)
 
-            # Residual + projecció
-            h = layer(agg + h)
-
-            # Activació
-            h = F.relu(h)
+            # Residual block with normalization for more stable optimization.
+            delta = F.relu(layer(agg))
+            delta = self.dropout(delta)
+            h = self.norms[layer_idx](h + delta)
 
         return h  # (B, N, H)
 
@@ -225,8 +244,8 @@ class PolicyHead(nn.Module):
 
     def __init__(self, hidden_dim, num_nodes):
         super().__init__()
-        # MLP del paper: de hidden_dim → num_nodes
-        self.mlp = MLP(hidden_dim, num_nodes)
+        self.query = nn.Linear(hidden_dim, hidden_dim)
+        self.key = nn.Linear(hidden_dim, hidden_dim)
 
     def forward(self, node_emb, current_city, visited_mask):
         """
@@ -240,11 +259,15 @@ class PolicyHead(nn.Module):
         batch_idx = torch.arange(B, device=node_emb.device)
         h_current = node_emb[batch_idx, current_city]  # (B, H)
 
-        # Passem pel MLP per obtenir logits sobre N nodes
-        logits = self.mlp(h_current)  # (B, N)
+        # Score each candidate node from current-node query vs node keys.
+        q = self.query(h_current)  # (B, H)
+        k = self.key(node_emb)  # (B, N, H)
+        logits = torch.einsum("bh,bnh->bn", q, k) / (H ** 0.5)  # (B, N)
 
-        # Apliquem màscara: nodes ja visitats no es poden triar
-        logits = logits.masked_fill(visited_mask.bool(), -1e9)
+        # Mask visited nodes and also disallow staying in current node.
+        invalid_mask = visited_mask.bool().clone()
+        invalid_mask[batch_idx, current_city] = True
+        logits = logits.masked_fill(invalid_mask, -1e9)
 
         return logits  # (B, N)
     
@@ -255,11 +278,10 @@ class SequentialTSPModel(nn.Module):
     Model seqüencial per predir el següent node en TSP.
     Combina:
       - NodeEmbedding
-      - Encoder (GCN simple o Transformer)
       - PolicyHead
     """
 
-    def __init__(self, hidden_dim, num_nodes):
+    def __init__(self, hidden_dim, num_nodes, num_neighbors=-1):
         super().__init__()
         self.num_nodes = num_nodes
         self.hidden_dim = hidden_dim
@@ -268,7 +290,7 @@ class SequentialTSPModel(nn.Module):
         self.node_embedding = NodeEmbedding(hidden_dim)
 
         # 2) Encoder: GCN
-        self.encoder = GCNEncoder(hidden_dim)
+        self.encoder = GCNEncoder(hidden_dim, num_neighbors=num_neighbors)
 
         # 3) Policy head (MLP → logits sobre N nodes)
         self.policy_head = PolicyHead(hidden_dim, num_nodes)
@@ -284,29 +306,27 @@ class SequentialTSPModel(nn.Module):
         node_emb = self.node_embedding(coords, visited_mask)  # (B, N, H)
 
         # 2) Encoder
-        if self.encoder_type == "gcn":
-            node_emb = self.encoder(node_emb, dist_matrix)     # (B, N, H)
-        else:  # transformer
-            node_emb = self.encoder(node_emb, dist_matrix=None)
+        node_emb = self.encoder(node_emb, dist_matrix)     # (B, N, H)
 
         # 3) Policy head → logits sobre el següent node
         logits = self.policy_head(node_emb, current_city, visited_mask)  # (B, N)
-
-        # 4) Masking imprescindible
-        logits = logits.masked_fill(visited_mask.bool(), -1e9)
 
         return logits
 
 
 #@title Hyperparameters
 num_nodes = 10 #@param # Could also be 10, 20, or 30!
-num_neighbors = -1
-batch_size = 256
-hidden_dim = 300 #@param
+num_neighbors = 5
+batch_size = 128
+hidden_dim = 50 #@param
 learning_rate = 1e-3 #@param
-max_epochs = 10 #@param
+max_epochs = 50 #@param
 batches_per_epoch = 10000
 accumulation_steps = 1
+lr_factor = 0.5
+lr_patience = 3
+min_lr = 1e-6
+early_stop_patience = 8
 train_filepath = f"tsp-data/tsp{num_nodes}_train_concorde.txt"
 val_filepath   = f"tsp-data/tsp{num_nodes}_val_concorde.txt"
 test_filepath  = f"tsp-data/tsp{num_nodes}_test_concorde.txt"
@@ -320,6 +340,10 @@ config = {
     'max_epochs': max_epochs,
     'batches_per_epoch': batches_per_epoch,
     'accumulation_steps': accumulation_steps,
+    'lr_factor': lr_factor,
+    'lr_patience': lr_patience,
+    'min_lr': min_lr,
+    'early_stop_patience': early_stop_patience,
     'train_filepath': train_filepath,
     'val_filepath': val_filepath,
     'test_filepath': test_filepath
@@ -341,7 +365,8 @@ def train_one_epoch(model, optimizer, config):
         num_nodes,
         num_neighbors,
         batch_size,
-        train_filepath
+        train_filepath,
+        shuffle_data=True
     )
     dataset = iter(dataset)
 
@@ -372,6 +397,7 @@ def train_one_epoch(model, optimizer, config):
         # Backward
         optimizer.zero_grad()
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
         optimizer.step()
 
         # Stats
@@ -401,7 +427,8 @@ def test(model, config, mode='test'):
         num_nodes,
         num_neighbors,
         batch_size,
-        filepath
+        filepath,
+        shuffle_data=False
     )
     dataset = iter(dataset)
 
@@ -409,7 +436,7 @@ def test(model, config, mode='test'):
     running_batches = 0
 
     with torch.no_grad():
-        for _ in range(256): # OJO AQUI
+        while True:
             try:
                 batch = next(dataset)
             except StopIteration:
@@ -433,29 +460,55 @@ def test(model, config, mode='test'):
 #@title Model instantiation + parameter count
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 print("Device:", device)
-model = SequentialTSPModel(config['hidden_dim'], config['num_nodes']).to(device)
+model = SequentialTSPModel(
+    config['hidden_dim'],
+    config['num_nodes'],
+    num_neighbors=config['num_neighbors']
+).to(device)
 nb_param = sum(p.numel() for p in model.parameters())
 print("Number of parameters:", nb_param)
 
 
 #@title Training loop
 optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+    optimizer,
+    mode='min',
+    factor=config['lr_factor'],
+    patience=config['lr_patience'],
+    min_lr=config['min_lr']
+)
 train_losses = []
 val_losses = []
-test_losses = []
+best_val_loss = float('inf')
+best_state_dict = None
+epochs_without_improvement = 0
+
 for epoch in range(config['max_epochs']):
     # Train
     train_time, train_loss = train_one_epoch(model, optimizer, config)
     train_losses.append(train_loss)
-    print(f"Epoch {epoch} | Train Loss: {train_loss:.4f}")
+    current_lr = optimizer.param_groups[0]['lr']
+    print(f"\nEpoch {epoch+1} | Train Loss: {train_loss:.4f} | LR: {current_lr:.2e}")
     # Validation
-    if epoch % 5 == 0 or epoch == config['max_epochs'] - 1:
-        val_loss = test(model, config, mode='val')
-        val_losses.append(val_loss)
-        print(f"Epoch {epoch} | Val Loss: {val_loss:.4f}")
+    val_loss = test(model, config, mode='val')
+    val_losses.append(val_loss)
+    print(f"Epoch {epoch+1} | Val Loss: {val_loss:.4f}")
+    scheduler.step(val_loss)
 
-    # Test
-    if epoch % 5 == 0 or epoch == config['max_epochs'] - 1:
-        test_loss = test(model, config, mode='test')
-        test_losses.append(test_loss)
-        print(f"Epoch {epoch} | Test Loss: {test_loss:.4f}\n")
+    if val_loss < best_val_loss:
+        best_val_loss = val_loss
+        best_state_dict = copy.deepcopy(model.state_dict())
+        epochs_without_improvement = 0
+    else:
+        epochs_without_improvement += 1
+
+    if epochs_without_improvement >= config['early_stop_patience']:
+        print(f"Early stopping at epoch {epoch+1} (best val: {best_val_loss:.4f})")
+        break
+
+if best_state_dict is not None:
+    model.load_state_dict(best_state_dict)
+
+test_loss = test(model, config, mode='test')
+print(f"\nFinal Test Loss (best val checkpoint): {test_loss:.4f}")
