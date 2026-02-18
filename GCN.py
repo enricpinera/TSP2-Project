@@ -38,7 +38,7 @@ class SequentialTSPReader(object):
         """
         Args:
             num_nodes: Number of nodes in TSP tours
-            num_neighbors: (unused, kept for compatibility with original code)
+            num_neighbors: Reserved for compatibility with the Transformer pipeline
             batch_size: Batch size
             filepath: Path to dataset file (.txt file)
         """
@@ -159,8 +159,8 @@ class MLP(nn.Module):
 #@title Node Embedding Layer
 class NodeEmbedding(nn.Module):
     """
-    Embedding inicial dels nodes a partir de:
-      - coordenades (x, y)
+    Initial node embedding from:
+      - coordinates (x, y)
       - visited_mask (0/1)
     """
 
@@ -185,7 +185,7 @@ class NodeEmbedding(nn.Module):
 #@title GCN Encoder
 class GCNEncoder(nn.Module):
     """
-    GCN amb múltiples capes, residuals i pesos basats en distàncies.
+    Multi-layer GCN with residual connections and distance-based edge weights.
     """
 
     def __init__(self, hidden_dim, num_layers=2, num_neighbors=-1, dropout=0.1):
@@ -193,7 +193,7 @@ class GCNEncoder(nn.Module):
         self.num_layers = num_layers
         self.num_neighbors = num_neighbors
 
-        # Cada capa és una projecció lineal H → H
+        # Each layer projects H -> H.
         self.layers = nn.ModuleList([
             nn.Linear(hidden_dim, hidden_dim) for _ in range(num_layers)
         ])
@@ -238,8 +238,7 @@ class GCNEncoder(nn.Module):
 #@title Policy Head
 class PolicyHead(nn.Module):
     """
-    Donats els embeddings dels nodes i el node actual,
-    produeix logits sobre el següent node.
+    Given node embeddings and current node index, outputs logits over next node.
     """
 
     def __init__(self, hidden_dim, num_nodes):
@@ -250,12 +249,12 @@ class PolicyHead(nn.Module):
     def forward(self, node_emb, current_city, visited_mask):
         """
         node_emb: (B, N, H)
-        current_city: (B,)  -- índex del node actual
-        visited_mask: (B, N) -- 1 si visitat, 0 si no
+        current_city: (B,) -- current node index
+        visited_mask: (B, N) -- 1 if visited, 0 otherwise
         """
         B, N, H = node_emb.shape
 
-        # Agafem l'embedding del node actual per a cada element del batch
+        # Gather current node embedding for each item in the batch.
         batch_idx = torch.arange(B, device=node_emb.device)
         h_current = node_emb[batch_idx, current_city]  # (B, H)
 
@@ -275,24 +274,30 @@ class PolicyHead(nn.Module):
 #@title Sequential TSP Model
 class SequentialTSPModel(nn.Module):
     """
-    Model seqüencial per predir el següent node en TSP.
-    Combina:
+    Sequential model to predict the next node in TSP.
+    Combines:
       - NodeEmbedding
+      - GCNEncoder
       - PolicyHead
     """
 
-    def __init__(self, hidden_dim, num_nodes, num_neighbors=-1):
+    def __init__(self, hidden_dim, num_nodes, num_neighbors=-1, gcn_num_layers=2, gcn_dropout=0.1):
         super().__init__()
         self.num_nodes = num_nodes
         self.hidden_dim = hidden_dim
 
-        # 1) Embedding inicial dels nodes
+        # 1) Initial node embeddings
         self.node_embedding = NodeEmbedding(hidden_dim)
 
-        # 2) Encoder: GCN
-        self.encoder = GCNEncoder(hidden_dim, num_neighbors=num_neighbors)
+        # 2) GCN encoder
+        self.encoder = GCNEncoder(
+            hidden_dim,
+            num_layers=gcn_num_layers,
+            num_neighbors=num_neighbors,
+            dropout=gcn_dropout
+        )
 
-        # 3) Policy head (MLP → logits sobre N nodes)
+        # 3) Policy head (logits over N nodes)
         self.policy_head = PolicyHead(hidden_dim, num_nodes)
 
     def forward(self, coords, dist_matrix, visited_mask, current_city):
@@ -302,13 +307,13 @@ class SequentialTSPModel(nn.Module):
         visited_mask: (B, N)
         current_city: (B,)
         """
-        # 1) Embedding inicial dels nodes
+        # 1) Initial node embeddings
         node_emb = self.node_embedding(coords, visited_mask)  # (B, N, H)
 
         # 2) Encoder
         node_emb = self.encoder(node_emb, dist_matrix)     # (B, N, H)
 
-        # 3) Policy head → logits sobre el següent node
+        # 3) Policy head -> logits over next node
         logits = self.policy_head(node_emb, current_city, visited_mask)  # (B, N)
 
         return logits
@@ -319,10 +324,13 @@ num_nodes = 10 #@param # Could also be 10, 20, or 30!
 num_neighbors = 5
 batch_size = 128
 hidden_dim = 50 #@param
+gcn_num_layers = 2
+gcn_dropout = 0.1
 learning_rate = 1e-3 #@param
 max_epochs = 50 #@param
 batches_per_epoch = 10000
 accumulation_steps = 1
+grad_clip_norm = 1.0
 lr_factor = 0.5
 lr_patience = 3
 min_lr = 1e-6
@@ -336,10 +344,13 @@ config = {
     'num_neighbors': num_neighbors,
     'batch_size': batch_size,
     'hidden_dim': hidden_dim,
+    'gcn_num_layers': gcn_num_layers,
+    'gcn_dropout': gcn_dropout,
     'learning_rate': learning_rate,
     'max_epochs': max_epochs,
     'batches_per_epoch': batches_per_epoch,
     'accumulation_steps': accumulation_steps,
+    'grad_clip_norm': grad_clip_norm,
     'lr_factor': lr_factor,
     'lr_patience': lr_patience,
     'min_lr': min_lr,
@@ -397,7 +408,7 @@ def train_one_epoch(model, optimizer, config):
         # Backward
         optimizer.zero_grad()
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=config['grad_clip_norm'])
         optimizer.step()
 
         # Stats
@@ -463,7 +474,9 @@ print("Device:", device)
 model = SequentialTSPModel(
     config['hidden_dim'],
     config['num_nodes'],
-    num_neighbors=config['num_neighbors']
+    num_neighbors=config['num_neighbors'],
+    gcn_num_layers=config['gcn_num_layers'],
+    gcn_dropout=config['gcn_dropout']
 ).to(device)
 nb_param = sum(p.numel() for p in model.parameters())
 print("Number of parameters:", nb_param)
