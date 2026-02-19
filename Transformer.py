@@ -256,8 +256,8 @@ class PolicyHead(nn.Module):
         return logits  # (B, N)
     
 
-#@title Sequential TSP Model
-class SequentialTSPModel(nn.Module):
+#@title Transformer Model
+class TransformerModel(nn.Module):
     """
     Sequential model to predict the next node in TSP.
     Combines:
@@ -477,7 +477,7 @@ def test(model, config, mode='test'):
 #@title Model instantiation + parameter count
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 print("Device:", device)
-model = SequentialTSPModel(
+model = TransformerModel(
     config['hidden_dim'],
     config['num_nodes'],
     num_heads=config['transformer_num_heads'],
