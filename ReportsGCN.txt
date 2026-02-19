@@ -174,24 +174,7 @@ Final Test Loss (best val checkpoint): 0.3323
 -----------------------------------------------------------------------------
 
 #@title Hyperparameters
-num_nodes = 10 #@param # Could also be 10, 20, or 30!
-num_neighbors = -1  # Used by the dataset reader for interface compatibility.
-batch_size = 128
-hidden_dim = 64 #@param
-learning_rate = 1e-3 #@param
-max_epochs = 50 #@param
-batches_per_epoch = 10000
-accumulation_steps = 1
-transformer_num_heads = 8
-transformer_num_layers = 3
-transformer_dropout = 0.15
-transformer_ff_multiplier = 4
-transformer_enable_nested_tensor = False
-grad_clip_norm = 1.0
-lr_factor = 0.5
-lr_patience = 3
-min_lr = 1e-6
-early_stop_patience = 8
+
 
 Device: cuda
 Number of parameters: 133888

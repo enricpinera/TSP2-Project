@@ -4,6 +4,7 @@ import torch.nn as nn
 
 import numpy as np
 import copy
+import os
 
 import time
 
@@ -96,7 +97,7 @@ class SequentialTSPReader(object):
         examples = []
         visited = np.zeros(self.num_nodes, dtype=np.float32)
 
-        for step in range(self.num_nodes - 1):
+        for step in range(self.num_nodes - 2):
             current = tour[step]
             next_city = tour[step + 1]
 
@@ -321,11 +322,11 @@ class SequentialTSPModel(nn.Module):
 
 #@title Hyperparameters
 num_nodes = 10 #@param # Could also be 10, 20, or 30!
-num_neighbors = 5
-batch_size = 256
+num_neighbors = 5 #@param
+batch_size = 256 #@param
 hidden_dim = 128 #@param
-gcn_num_layers = 5
-gcn_dropout = 0.15
+gcn_num_layers = 5 #@param
+gcn_dropout = 0.15 #@param
 learning_rate = 1e-3 #@param
 max_epochs = 50 #@param
 batches_per_epoch = 10000
@@ -335,6 +336,8 @@ lr_factor = 0.5
 lr_patience = 3
 min_lr = 1e-6
 early_stop_patience = 8
+save_dir = "Models"
+save_prefix = "gcn"
 train_filepath = f"tsp-data/tsp{num_nodes}_train_concorde.txt"
 val_filepath   = f"tsp-data/tsp{num_nodes}_val_concorde.txt"
 test_filepath  = f"tsp-data/tsp{num_nodes}_test_concorde.txt"
@@ -355,6 +358,8 @@ config = {
     'lr_patience': lr_patience,
     'min_lr': min_lr,
     'early_stop_patience': early_stop_patience,
+    'save_dir': save_dir,
+    'save_prefix': save_prefix,
     'train_filepath': train_filepath,
     'val_filepath': val_filepath,
     'test_filepath': test_filepath
@@ -495,6 +500,7 @@ train_losses = []
 val_losses = []
 best_val_loss = float('inf')
 best_state_dict = None
+best_epoch = -1
 epochs_without_improvement = 0
 
 for epoch in range(config['max_epochs']):
@@ -512,6 +518,7 @@ for epoch in range(config['max_epochs']):
     if val_loss < best_val_loss:
         best_val_loss = val_loss
         best_state_dict = copy.deepcopy(model.state_dict())
+        best_epoch = epoch + 1
         epochs_without_improvement = 0
     else:
         epochs_without_improvement += 1
@@ -525,3 +532,30 @@ if best_state_dict is not None:
 
 test_loss = test(model, config, mode='test')
 print(f"\nFinal Test Loss (best val checkpoint): {test_loss:.4f}")
+
+os.makedirs(config['save_dir'], exist_ok=True)
+checkpoint_filename = f"{config['save_prefix']}_tsp{config['num_nodes']}.pt"
+checkpoint_path = os.path.join(config['save_dir'], checkpoint_filename)
+new_checkpoint = {
+    'model_type': 'gcn',
+    'model_state_dict': model.state_dict(),
+    'config': config,
+    'best_val_loss': best_val_loss,
+    'best_epoch': best_epoch,
+    'final_test_loss': test_loss
+}
+
+should_save = True
+if os.path.exists(checkpoint_path):
+    existing_checkpoint = torch.load(checkpoint_path, map_location='cpu')
+    existing_test_loss = existing_checkpoint.get('final_test_loss', float('inf'))
+    if existing_test_loss <= test_loss:
+        should_save = False
+        print(
+            f"Kept existing checkpoint (existing test loss: {existing_test_loss:.4f} "
+            f"<= new test loss: {test_loss:.4f})"
+        )
+
+if should_save:
+    torch.save(new_checkpoint, checkpoint_path)
+    print(f"Saved checkpoint: {checkpoint_path}")
