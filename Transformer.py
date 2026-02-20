@@ -318,10 +318,10 @@ class TransformerModel(nn.Module):
 #@title Hyperparameters
 num_nodes = 10 #@param # Could also be 10, 20, or 30!
 num_neighbors = -1  # Used by the dataset reader for interface compatibility.
-batch_size = 128 #@param
-hidden_dim = 64 #@param
+batch_size = 256 #@param
+hidden_dim = 128 #@param
 learning_rate = 1e-3 #@param
-max_epochs = 50 #@param
+max_epochs = 100 #@param
 batches_per_epoch = 10000
 accumulation_steps = 1
 transformer_num_heads = 8
