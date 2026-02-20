@@ -550,7 +550,7 @@ new_checkpoint = {
 
 should_save = True
 if os.path.exists(checkpoint_path):
-    existing_checkpoint = torch.load(checkpoint_path, map_location='cpu')
+    existing_checkpoint = torch.load(checkpoint_path, map_location='cpu', weights_only=True)
     existing_test_loss = existing_checkpoint.get('final_test_loss', float('inf'))
     if existing_test_loss <= test_loss:
         should_save = False

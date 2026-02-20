@@ -330,3 +330,24 @@ Epoch 50 | Train Loss: 0.2803 | LR: 2.50e-04
 Epoch 50 | Val Loss: 0.2606
 
 Final Test Loss (best val checkpoint): 0.2637
+
+-----------------------------------------------------------------------------
+
+#@title Hyperparameters
+num_nodes = 10 #@param # Could also be 10, 20, or 30!
+num_neighbors = 7 #@param
+batch_size = 256 #@param
+hidden_dim = 256 #@param
+gcn_num_layers = 7 #@param
+gcn_dropout = 0.15 #@param
+learning_rate = 1e-3 #@param
+max_epochs = 100 #@param
+batches_per_epoch = 10000
+accumulation_steps = 1
+grad_clip_norm = 1.0
+lr_factor = 0.5
+lr_patience = 3
+min_lr = 1e-6
+early_stop_patience = 8
+
+

@@ -273,7 +273,7 @@ checkpoint_path = os.path.join(config['save_dir'], f"{config['save_prefix']}_tsp
 if not os.path.exists(checkpoint_path):
     raise FileNotFoundError(f"Checkpoint not found: {checkpoint_path}")
 
-checkpoint = torch.load(checkpoint_path, map_location=device)
+checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=True)
 ckpt_cfg = checkpoint.get('config', {})
 model = TransformerModel(
     hidden_dim=ckpt_cfg.get('hidden_dim', config['hidden_dim']),

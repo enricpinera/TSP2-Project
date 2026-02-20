@@ -322,13 +322,13 @@ class GCNModel(nn.Module):
 
 #@title Hyperparameters
 num_nodes = 10 #@param # Could also be 10, 20, or 30!
-num_neighbors = 5 #@param
+num_neighbors = 7 #@param
 batch_size = 256 #@param
-hidden_dim = 128 #@param
-gcn_num_layers = 5 #@param
+hidden_dim = 256 #@param
+gcn_num_layers = 7 #@param
 gcn_dropout = 0.15 #@param
 learning_rate = 1e-3 #@param
-max_epochs = 50 #@param
+max_epochs = 100 #@param
 batches_per_epoch = 10000
 accumulation_steps = 1
 grad_clip_norm = 1.0
@@ -547,7 +547,7 @@ new_checkpoint = {
 
 should_save = True
 if os.path.exists(checkpoint_path):
-    existing_checkpoint = torch.load(checkpoint_path, map_location='cpu')
+    existing_checkpoint = torch.load(checkpoint_path, map_location='cpu', weights_only=True)
     existing_test_loss = existing_checkpoint.get('final_test_loss', float('inf'))
     if existing_test_loss <= test_loss:
         should_save = False
