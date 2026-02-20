@@ -682,4 +682,6 @@ Epoch 100 | Val Loss: 0.1447
 
 Final Test Loss (best val checkpoint): 0.1475
 
+Mean score (tour_length / optimal_length - 1): 0.001229
+
 -----------------------------------------------------------------------------
