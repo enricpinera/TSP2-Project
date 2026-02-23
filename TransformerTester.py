@@ -184,6 +184,16 @@ def tour_length(coords, tour):
     )
 
 
+CSV_DECIMALS = 6
+
+
+def format_csv_float(value):
+    rounded = round(float(value), CSV_DECIMALS)
+    if rounded == 0.0:
+        rounded = 0.0
+    return format(rounded, f".{CSV_DECIMALS}f")
+
+
 def predict_tour(model, coords, start_node_one_based, device):
     num_nodes = coords.shape[0]
     start = start_node_one_based - 1
@@ -235,14 +245,20 @@ def evaluate(model, config, device):
 
         optimal_tour_str = "{" + ", ".join(str(node + 1) for node in optimal_tour) + "}"
         pred_tour_str = "{" + ", ".join(str(node + 1) for node in pred_tour) + "}"
-        results.append((optimal_tour_str, opt_len, pred_tour_str, pred_len))
+        results.append((
+            optimal_tour_str,
+            format_csv_float(opt_len),
+            pred_tour_str,
+            format_csv_float(pred_len),
+            format_csv_float(score),
+        ))
         scores.append(score)
 
     os.makedirs(config['results_dir'], exist_ok=True)
     csv_path = os.path.join(config['results_dir'], f"{config['save_prefix']}_tsp{config['num_nodes']}.csv")
     with open(csv_path, "w", newline="") as csv_file:
         writer = csv.writer(csv_file)
-        writer.writerow(["optimal_tour", "optimal_tour_length", model_tour_col, model_tour_length_col])
+        writer.writerow(["optimal_tour", "optimal_tour_length", model_tour_col, model_tour_length_col, "score"])
         writer.writerows(results)
 
     return float(np.mean(scores))
