@@ -1,4 +1,5 @@
 import os
+import csv
 
 import numpy as np
 import torch
@@ -224,7 +225,11 @@ def evaluate(model, config, device):
     if config['max_instances'] is not None:
         lines = lines[:config['max_instances']]
 
+    results = []
     scores = []
+    model_tour_col = f"{config['save_prefix']}_tour"
+    model_tour_length_col = f"{config['save_prefix']}_tour_length"
+
     for line in lines:
         coords, optimal_tour = parse_instance(line, config['num_nodes'])
         pred_tour = predict_tour(model, coords, config['start_node'], device)
@@ -232,19 +237,31 @@ def evaluate(model, config, device):
         pred_len = tour_length(coords, pred_tour)
         opt_len = tour_length(coords, optimal_tour)
         score = pred_len / opt_len - 1.0
+
+        optimal_tour_str = "{" + ", ".join(str(node + 1) for node in optimal_tour) + "}"
+        pred_tour_str = "{" + ", ".join(str(node + 1) for node in pred_tour) + "}"
+        results.append((optimal_tour_str, opt_len, pred_tour_str, pred_len))
         scores.append(score)
+
+    os.makedirs(config['results_dir'], exist_ok=True)
+    csv_path = os.path.join(config['results_dir'], f"{config['save_prefix']}_tsp{config['num_nodes']}.csv")
+    with open(csv_path, "w", newline="") as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(["optimal_tour", "optimal_tour_length", model_tour_col, model_tour_length_col])
+        writer.writerows(results)
 
     return float(np.mean(scores))
 
 
 #@title Hyperparameters
 num_nodes = 10 #@param # Could also be 10, 20, or 30!
-num_neighbors = 5 #@param
+num_neighbors = 7 #@param
 batch_size = 256 #@param
-hidden_dim = 128 #@param
-gcn_num_layers = 5 #@param
+hidden_dim = 256 #@param
+gcn_num_layers = 7 #@param
 gcn_dropout = 0.15 #@param
 save_dir = "Models"
+results_dir = "Results"
 save_prefix = "gcn"
 test_filepath = f"tsp-data/tsp{num_nodes}_test_concorde.txt"
 start_node = 1
@@ -258,6 +275,7 @@ config = {
     'gcn_num_layers': gcn_num_layers,
     'gcn_dropout': gcn_dropout,
     'save_dir': save_dir,
+    'results_dir': results_dir,
     'save_prefix': save_prefix,
     'test_filepath': test_filepath,
     'start_node': start_node,

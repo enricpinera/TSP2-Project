@@ -317,18 +317,18 @@ class TransformerModel(nn.Module):
 
 #@title Hyperparameters
 num_nodes = 10 #@param # Could also be 10, 20, or 30!
-num_neighbors = -1  # Used by the dataset reader for interface compatibility.
+num_neighbors = -1  #@param # Used by the dataset reader for interface compatibility.
 batch_size = 256 #@param
 hidden_dim = 128 #@param
-learning_rate = 1e-3 #@param
-max_epochs = 100 #@param
+learning_rate = 1e-3
+max_epochs = 100
 batches_per_epoch = 10000
 accumulation_steps = 1
-transformer_num_heads = 8
-transformer_num_layers = 3
-transformer_dropout = 0.15
-transformer_ff_multiplier = 4
-transformer_enable_nested_tensor = False
+transformer_num_heads = 8 #@param
+transformer_num_layers = 3 #@param
+transformer_dropout = 0.15 #@param
+transformer_ff_multiplier = 4 #@param
+transformer_enable_nested_tensor = False #@param
 grad_clip_norm = 1.0
 lr_factor = 0.5
 lr_patience = 3
