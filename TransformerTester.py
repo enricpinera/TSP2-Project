@@ -1,5 +1,6 @@
 import os
 import csv
+import time
 
 import numpy as np
 import torch
@@ -232,12 +233,15 @@ def evaluate(model, config, device):
 
     results = []
     scores = []
+    times = []
     model_tour_col = f"{config['save_prefix']}_tour"
     model_tour_length_col = f"{config['save_prefix']}_tour_length"
 
     for line in lines:
         coords, optimal_tour = parse_instance(line, config['num_nodes'])
+        t0 = time.perf_counter()
         pred_tour = predict_tour(model, coords, config['start_node'], device)
+        tour_time = time.perf_counter() - t0
 
         pred_len = tour_length(coords, pred_tour)
         opt_len = tour_length(coords, optimal_tour)
@@ -251,17 +255,19 @@ def evaluate(model, config, device):
             pred_tour_str,
             format_csv_float(pred_len),
             format_csv_float(score),
+            format_csv_float(tour_time),
         ))
         scores.append(score)
+        times.append(tour_time)
 
     os.makedirs(config['results_dir'], exist_ok=True)
     csv_path = os.path.join(config['results_dir'], f"{config['save_prefix']}_tsp{config['num_nodes']}.csv")
     with open(csv_path, "w", newline="") as csv_file:
         writer = csv.writer(csv_file)
-        writer.writerow(["optimal_tour", "optimal_tour_length", model_tour_col, model_tour_length_col, "score"])
+        writer.writerow(["optimal_tour", "optimal_tour_length", model_tour_col, model_tour_length_col, "score", "time"])
         writer.writerows(results)
 
-    return float(np.mean(scores))
+    return float(np.mean(scores)), float(np.mean(times))
 
 
 #@title Hyperparameters
@@ -321,6 +327,7 @@ model = TransformerModel(
 model.load_state_dict(checkpoint['model_state_dict'])
 model.eval()
 
-mean_score = evaluate(model, config, device)
+mean_score, mean_time = evaluate(model, config, device)
 print(f"Checkpoint: {checkpoint_path}")
-print(f"Mean score (tour_length / optimal_length - 1): {mean_score:.6f}")
+print(f"Mean score: {mean_score:.6f}")
+print(f"Mean time: {mean_time:.6f}s")
