@@ -423,7 +423,7 @@ def run_all_heuristics(config):
 
 
 #@title Hyperparameters
-num_nodes = 10  # Could also be 10, 20, or 30
+num_nodes = 20  # Could also be 10, 20, or 30
 results_dir = "Results"
 test_filepath = f"tsp-data/tsp{num_nodes}_test_concorde.txt"
 start_node = 1
