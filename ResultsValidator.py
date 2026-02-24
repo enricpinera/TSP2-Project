@@ -1,4 +1,5 @@
 import os
+import re
 from typing import Dict, List, Tuple
 
 import pandas as pd
@@ -61,7 +62,15 @@ def detect_algorithm_columns(fieldnames: List[str]) -> Tuple[str, str, str]:
     return algorithm_from_tour, tour_col, length_col
 
 
-def audit_file(csv_path: str) -> Tuple[Dict[str, str], List[str]]:
+def extract_num_nodes_from_filename(csv_path: str) -> int:
+    name = os.path.basename(csv_path)
+    match = re.search(r"_tsp(\d+)\.csv$", name)
+    if not match:
+        raise ValueError(f"cannot extract num_nodes from filename: {name}")
+    return int(match.group(1))
+
+
+def audit_file(csv_path: str, num_nodes: int) -> Tuple[Dict[str, str], List[str]]:
     base_required = {"optimal_tour", "optimal_tour_length", "score", "time"}
     errors: List[str] = []
     total_rows = 0
@@ -138,6 +147,7 @@ def audit_file(csv_path: str) -> Tuple[Dict[str, str], List[str]]:
     status = "ok" if invalid_rows == 0 else "issues_found"
 
     summary = {
+        "num_nodes": str(num_nodes),
         "algorithm": algorithm,
         "file": os.path.basename(csv_path),
         "rows": str(total_rows),
@@ -157,58 +167,70 @@ def print_summary_csv(summary_path: str) -> None:
 
 def main():
     results_dir = "Results"
-    summary_filename = "summary.csv"
-    summary_path = os.path.join(results_dir, summary_filename)
-
     csv_files = [
         os.path.join(results_dir, name)
         for name in sorted(os.listdir(results_dir))
-        if name.endswith(".csv") and name != summary_filename
+        if name.endswith(".csv") and not name.startswith("summary")
     ]
 
     if not csv_files:
         raise FileNotFoundError(f"No CSV files found in {results_dir}")
 
-    summaries = []
-    all_errors = {}
-
+    grouped_files: Dict[int, List[str]] = {}
     for csv_path in csv_files:
-        summary, errors = audit_file(csv_path)
-        summaries.append(summary)
-        if errors:
-            all_errors[os.path.basename(csv_path)] = errors
+        num_nodes = extract_num_nodes_from_filename(csv_path)
+        grouped_files.setdefault(num_nodes, []).append(csv_path)
 
-    summary_df = pd.DataFrame(
-        summaries,
-        columns=[
-            "algorithm",
-            "file",
-            "rows",
-            "valid_rows",
-            "invalid_rows",
-            "mean_score",
-            "mean_time",
-            "status",
-        ],
-    )
-    summary_df.to_csv(summary_path, index=False)
+    any_errors = False
+    for num_nodes in sorted(grouped_files.keys()):
+        summaries = []
+        all_errors = {}
+        summary_filename = f"summary_tsp{num_nodes}.csv"
+        summary_path = os.path.join(results_dir, summary_filename)
 
-    print(f"Summary written to: {summary_path}")
-    print("")
-    print_summary_csv(summary_path)
-    print("")
+        for csv_path in sorted(grouped_files[num_nodes]):
+            summary, errors = audit_file(csv_path, num_nodes)
+            summaries.append(summary)
+            if errors:
+                all_errors[os.path.basename(csv_path)] = errors
 
-    if all_errors:
-        print("Validation errors found:")
-        for file_name in sorted(all_errors.keys()):
-            issues = all_errors[file_name]
-            print(f"- {file_name}: {len(issues)} issue(s)")
-            for issue in issues[:10]:
-                print(f"  {issue}")
-            if len(issues) > 10:
-                print(f"  ... and {len(issues) - 10} more")
-    else:
-        print("All CSV files passed validation.")
+        summary_df = pd.DataFrame(
+            summaries,
+            columns=[
+                "num_nodes",
+                "algorithm",
+                "file",
+                "rows",
+                "valid_rows",
+                "invalid_rows",
+                "mean_score",
+                "mean_time",
+                "status",
+            ],
+        )
+        summary_df.to_csv(summary_path, index=False)
+
+        print(f"Summary written to: {summary_path}")
+        print("")
+        print_summary_csv(summary_path)
+        print("")
+
+        if all_errors:
+            any_errors = True
+            print(f"Validation errors found for num_nodes={num_nodes}:")
+            for file_name in sorted(all_errors.keys()):
+                issues = all_errors[file_name]
+                print(f"- {file_name}: {len(issues)} issue(s)")
+                for issue in issues[:10]:
+                    print(f"  {issue}")
+                if len(issues) > 10:
+                    print(f"  ... and {len(issues) - 10} more")
+        else:
+            print(f"All CSV files passed validation for num_nodes={num_nodes}.")
+        print("")
+
+    if not any_errors:
+        print("All summaries completed without validation errors.")
 
 
 if __name__ == "__main__":
