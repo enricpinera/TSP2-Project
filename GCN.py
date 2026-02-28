@@ -321,15 +321,15 @@ class GCNModel(nn.Module):
 
 
 #@title Hyperparameters
-num_nodes = 10 #@param # Could also be 10, 20, or 30!
-num_neighbors = 7 #@param
+num_nodes = 20 #@param # Could also be 10, 20, or 30!
+num_neighbors = 10 #@param
 batch_size = 256 #@param
 hidden_dim = 256 #@param
-gcn_num_layers = 7 #@param
+gcn_num_layers = 10 #@param
 gcn_dropout = 0.15 #@param
 learning_rate = 1e-3
 max_epochs = 100
-batches_per_epoch = 10000
+batches_per_epoch = 10000 # all dataset set is used in every epoch 
 accumulation_steps = 1
 grad_clip_norm = 1.0
 lr_factor = 0.5

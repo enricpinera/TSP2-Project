@@ -316,7 +316,7 @@ class TransformerModel(nn.Module):
 
 
 #@title Hyperparameters
-num_nodes = 10 #@param # Could also be 10, 20, or 30!
+num_nodes = 20 #@param # Could also be 10, 20, or 30!
 num_neighbors = -1  #@param # Used by the dataset reader for interface compatibility.
 batch_size = 256 #@param
 hidden_dim = 128 #@param

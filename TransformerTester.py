@@ -271,7 +271,7 @@ def evaluate(model, config, device):
 
 
 #@title Hyperparameters
-num_nodes = 10 #@param # Could also be 10, 20, or 30!
+num_nodes = 20 #@param # Could also be 10, 20, or 30!
 num_neighbors = -1 #@param
 batch_size = 256 #@param
 hidden_dim = 128 #@param

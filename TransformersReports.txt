@@ -3,362 +3,6 @@
 
 #@title Hyperparameters
 num_nodes = 10 #@param # Could also be 10, 20, or 30!
-num_neighbors = -1
-batch_size = 128
-hidden_dim = 50 #@param
-learning_rate = 1e-3 #@param
-max_epochs = 50 #@param
-batches_per_epoch = 10000
-accumulation_steps = 1
-transformer_num_heads = 5
-transformer_num_layers = 2
-transformer_dropout = 0.1
-transformer_ff_multiplier = 4
-transformer_enable_nested_tensor = False
-grad_clip_norm = 1.0
-lr_factor = 0.5
-lr_patience = 3
-min_lr = 1e-6
-early_stop_patience = 8
-
-Device: cuda
-/home/enric/.local/lib/python3.10/site-packages/torch/nn/modules/transformer.py:382: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.self_attn.num_heads is odd
-  warnings.warn(
-Number of parameters: 69150
-
-Epoch 1 | Train Loss: 0.3573 | LR: 1.00e-03
-Epoch 1 | Val Loss: 0.2827
-
-Epoch 2 | Train Loss: 0.3031 | LR: 1.00e-03
-Epoch 2 | Val Loss: 0.2612
-
-Epoch 3 | Train Loss: 0.2881 | LR: 1.00e-03
-Epoch 3 | Val Loss: 0.2454
-
-Epoch 4 | Train Loss: 0.2800 | LR: 1.00e-03
-Epoch 4 | Val Loss: 0.2344
-
-Epoch 5 | Train Loss: 0.2731 | LR: 1.00e-03
-Epoch 5 | Val Loss: 0.2331
-
-Epoch 6 | Train Loss: 0.2703 | LR: 1.00e-03
-Epoch 6 | Val Loss: 0.2333
-
-Epoch 7 | Train Loss: 0.2663 | LR: 1.00e-03
-Epoch 7 | Val Loss: 0.2289
-
-Epoch 8 | Train Loss: 0.2632 | LR: 1.00e-03
-Epoch 8 | Val Loss: 0.2254
-
-Epoch 9 | Train Loss: 0.2615 | LR: 1.00e-03
-Epoch 9 | Val Loss: 0.2268
-
-Epoch 10 | Train Loss: 0.2595 | LR: 1.00e-03
-Epoch 10 | Val Loss: 0.2235
-
-Epoch 11 | Train Loss: 0.2588 | LR: 1.00e-03
-Epoch 11 | Val Loss: 0.2227
-
-Epoch 12 | Train Loss: 0.2579 | LR: 1.00e-03
-Epoch 12 | Val Loss: 0.2172
-
-Epoch 13 | Train Loss: 0.2563 | LR: 1.00e-03
-Epoch 13 | Val Loss: 0.2172
-
-Epoch 14 | Train Loss: 0.2545 | LR: 1.00e-03
-Epoch 14 | Val Loss: 0.2113
-
-Epoch 15 | Train Loss: 0.2537 | LR: 1.00e-03
-Epoch 15 | Val Loss: 0.2144
-
-Epoch 16 | Train Loss: 0.2534 | LR: 1.00e-03
-Epoch 16 | Val Loss: 0.2088
-
-Epoch 17 | Train Loss: 0.2514 | LR: 1.00e-03
-Epoch 17 | Val Loss: 0.2151
-
-Epoch 18 | Train Loss: 0.2513 | LR: 1.00e-03
-Epoch 18 | Val Loss: 0.2133
-
-Epoch 19 | Train Loss: 0.2508 | LR: 1.00e-03
-Epoch 19 | Val Loss: 0.2118
-
-Epoch 20 | Train Loss: 0.2501 | LR: 1.00e-03
-Epoch 20 | Val Loss: 0.2108
-
-Epoch 21 | Train Loss: 0.2361 | LR: 5.00e-04
-Epoch 21 | Val Loss: 0.1960
-
-Epoch 22 | Train Loss: 0.2338 | LR: 5.00e-04
-Epoch 22 | Val Loss: 0.1928
-
-Epoch 23 | Train Loss: 0.2328 | LR: 5.00e-04
-Epoch 23 | Val Loss: 0.1979
-
-Epoch 24 | Train Loss: 0.2321 | LR: 5.00e-04
-Epoch 24 | Val Loss: 0.1941
-
-Epoch 25 | Train Loss: 0.2314 | LR: 5.00e-04
-Epoch 25 | Val Loss: 0.1937
-
-Epoch 26 | Train Loss: 0.2303 | LR: 5.00e-04
-Epoch 26 | Val Loss: 0.1918
-
-Epoch 27 | Train Loss: 0.2304 | LR: 5.00e-04
-Epoch 27 | Val Loss: 0.1926
-
-Epoch 28 | Train Loss: 0.2298 | LR: 5.00e-04
-Epoch 28 | Val Loss: 0.1902
-
-Epoch 29 | Train Loss: 0.2297 | LR: 5.00e-04
-Epoch 29 | Val Loss: 0.1883
-
-Epoch 30 | Train Loss: 0.2298 | LR: 5.00e-04
-Epoch 30 | Val Loss: 0.1909
-
-Epoch 31 | Train Loss: 0.2284 | LR: 5.00e-04
-Epoch 31 | Val Loss: 0.1911
-
-Epoch 32 | Train Loss: 0.2280 | LR: 5.00e-04
-Epoch 32 | Val Loss: 0.1867
-
-Epoch 33 | Train Loss: 0.2290 | LR: 5.00e-04
-Epoch 33 | Val Loss: 0.1887
-
-Epoch 34 | Train Loss: 0.2288 | LR: 5.00e-04
-Epoch 34 | Val Loss: 0.1901
-
-Epoch 35 | Train Loss: 0.2278 | LR: 5.00e-04
-Epoch 35 | Val Loss: 0.1901
-
-Epoch 36 | Train Loss: 0.2275 | LR: 5.00e-04
-Epoch 36 | Val Loss: 0.1890
-
-Epoch 37 | Train Loss: 0.2206 | LR: 2.50e-04
-Epoch 37 | Val Loss: 0.1794
-
-Epoch 38 | Train Loss: 0.2188 | LR: 2.50e-04
-Epoch 38 | Val Loss: 0.1799
-
-Epoch 39 | Train Loss: 0.2184 | LR: 2.50e-04
-Epoch 39 | Val Loss: 0.1803
-
-Epoch 40 | Train Loss: 0.2191 | LR: 2.50e-04
-Epoch 40 | Val Loss: 0.1791
-
-Epoch 41 | Train Loss: 0.2176 | LR: 2.50e-04
-Epoch 41 | Val Loss: 0.1787
-
-Epoch 42 | Train Loss: 0.2174 | LR: 2.50e-04
-Epoch 42 | Val Loss: 0.1795
-
-Epoch 43 | Train Loss: 0.2178 | LR: 2.50e-04
-Epoch 43 | Val Loss: 0.1783
-
-Epoch 44 | Train Loss: 0.2175 | LR: 2.50e-04
-Epoch 44 | Val Loss: 0.1795
-
-Epoch 45 | Train Loss: 0.2172 | LR: 2.50e-04
-Epoch 45 | Val Loss: 0.1794
-
-Epoch 46 | Train Loss: 0.2172 | LR: 2.50e-04
-Epoch 46 | Val Loss: 0.1780
-
-Epoch 47 | Train Loss: 0.2166 | LR: 2.50e-04
-Epoch 47 | Val Loss: 0.1797
-
-Epoch 48 | Train Loss: 0.2163 | LR: 2.50e-04
-Epoch 48 | Val Loss: 0.1775
-
-Epoch 49 | Train Loss: 0.2170 | LR: 2.50e-04
-Epoch 49 | Val Loss: 0.1773
-
-Epoch 50 | Train Loss: 0.2172 | LR: 2.50e-04
-Epoch 50 | Val Loss: 0.1770
-
-Final Test Loss (best val checkpoint): 0.1794
-
------------------------------------------------------------------------------
-
-#@title Hyperparameters
-num_nodes = 10 #@param # Could also be 10, 20, or 30!
-num_neighbors = -1  # Used by the dataset reader for interface compatibility.
-batch_size = 128
-hidden_dim = 64 #@param
-learning_rate = 1e-3 #@param
-max_epochs = 50 #@param
-batches_per_epoch = 10000
-accumulation_steps = 1
-transformer_num_heads = 8
-transformer_num_layers = 3
-transformer_dropout = 0.15
-transformer_ff_multiplier = 4
-transformer_enable_nested_tensor = False
-grad_clip_norm = 1.0
-lr_factor = 0.5
-lr_patience = 3
-min_lr = 1e-6
-early_stop_patience = 8
-
-Device: cuda
-Number of parameters: 162688
-
-Epoch 1 | Train Loss: 0.3437 | LR: 1.00e-03
-Epoch 1 | Val Loss: 0.2686
-
-Epoch 2 | Train Loss: 0.2905 | LR: 1.00e-03
-Epoch 2 | Val Loss: 0.2306
-
-Epoch 3 | Train Loss: 0.2755 | LR: 1.00e-03
-Epoch 3 | Val Loss: 0.2281
-
-Epoch 4 | Train Loss: 0.2670 | LR: 1.00e-03
-Epoch 4 | Val Loss: 0.2145
-
-Epoch 5 | Train Loss: 0.2615 | LR: 1.00e-03
-Epoch 5 | Val Loss: 0.2136
-
-Epoch 6 | Train Loss: 0.2572 | LR: 1.00e-03
-Epoch 6 | Val Loss: 0.2091
-
-Epoch 7 | Train Loss: 0.2519 | LR: 1.00e-03
-Epoch 7 | Val Loss: 0.2164
-
-Epoch 8 | Train Loss: 0.2497 | LR: 1.00e-03
-Epoch 8 | Val Loss: 0.2081
-
-Epoch 9 | Train Loss: 0.2476 | LR: 1.00e-03
-Epoch 9 | Val Loss: 0.2031
-
-Epoch 10 | Train Loss: 0.2457 | LR: 1.00e-03
-Epoch 10 | Val Loss: 0.2037
-
-Epoch 11 | Train Loss: 0.2442 | LR: 1.00e-03
-Epoch 11 | Val Loss: 0.2037
-
-Epoch 12 | Train Loss: 0.2420 | LR: 1.00e-03
-Epoch 12 | Val Loss: 0.2015
-
-Epoch 13 | Train Loss: 0.2417 | LR: 1.00e-03
-Epoch 13 | Val Loss: 0.1973
-
-Epoch 14 | Train Loss: 0.2406 | LR: 1.00e-03
-Epoch 14 | Val Loss: 0.2044
-
-Epoch 15 | Train Loss: 0.2392 | LR: 1.00e-03
-Epoch 15 | Val Loss: 0.1955
-
-Epoch 16 | Train Loss: 0.2386 | LR: 1.00e-03
-Epoch 16 | Val Loss: 0.1985
-
-Epoch 17 | Train Loss: 0.2378 | LR: 1.00e-03
-Epoch 17 | Val Loss: 0.1956
-
-Epoch 18 | Train Loss: 0.2366 | LR: 1.00e-03
-Epoch 18 | Val Loss: 0.1948
-
-Epoch 19 | Train Loss: 0.2360 | LR: 1.00e-03
-Epoch 19 | Val Loss: 0.1942
-
-Epoch 20 | Train Loss: 0.2354 | LR: 1.00e-03
-Epoch 20 | Val Loss: 0.1937
-
-Epoch 21 | Train Loss: 0.2339 | LR: 1.00e-03
-Epoch 21 | Val Loss: 0.1901
-
-Epoch 22 | Train Loss: 0.2343 | LR: 1.00e-03
-Epoch 22 | Val Loss: 0.1992
-
-Epoch 23 | Train Loss: 0.2333 | LR: 1.00e-03
-Epoch 23 | Val Loss: 0.1896
-
-Epoch 24 | Train Loss: 0.2335 | LR: 1.00e-03
-Epoch 24 | Val Loss: 0.1906
-
-Epoch 25 | Train Loss: 0.2326 | LR: 1.00e-03
-Epoch 25 | Val Loss: 0.1885
-
-Epoch 26 | Train Loss: 0.2326 | LR: 1.00e-03
-Epoch 26 | Val Loss: 0.1882
-
-Epoch 27 | Train Loss: 0.2316 | LR: 1.00e-03
-Epoch 27 | Val Loss: 0.1953
-
-Epoch 28 | Train Loss: 0.2312 | LR: 1.00e-03
-Epoch 28 | Val Loss: 0.1874
-
-Epoch 29 | Train Loss: 0.2314 | LR: 1.00e-03
-Epoch 29 | Val Loss: 0.1850
-
-Epoch 30 | Train Loss: 0.2306 | LR: 1.00e-03
-Epoch 30 | Val Loss: 0.1860
-
-Epoch 31 | Train Loss: 0.2303 | LR: 1.00e-03
-Epoch 31 | Val Loss: 0.1906
-
-Epoch 32 | Train Loss: 0.2314 | LR: 1.00e-03
-Epoch 32 | Val Loss: 0.1874
-
-Epoch 33 | Train Loss: 0.2302 | LR: 1.00e-03
-Epoch 33 | Val Loss: 0.1946
-
-Epoch 34 | Train Loss: 0.2169 | LR: 5.00e-04
-Epoch 34 | Val Loss: 0.1734
-
-Epoch 35 | Train Loss: 0.2143 | LR: 5.00e-04
-Epoch 35 | Val Loss: 0.1745
-
-Epoch 36 | Train Loss: 0.2132 | LR: 5.00e-04
-Epoch 36 | Val Loss: 0.1734
-
-Epoch 37 | Train Loss: 0.2128 | LR: 5.00e-04
-Epoch 37 | Val Loss: 0.1730
-
-Epoch 38 | Train Loss: 0.2124 | LR: 5.00e-04
-Epoch 38 | Val Loss: 0.1713
-
-Epoch 39 | Train Loss: 0.2126 | LR: 5.00e-04
-Epoch 39 | Val Loss: 0.1723
-
-Epoch 40 | Train Loss: 0.2111 | LR: 5.00e-04
-Epoch 40 | Val Loss: 0.1694
-
-Epoch 41 | Train Loss: 0.2114 | LR: 5.00e-04
-Epoch 41 | Val Loss: 0.1724
-
-Epoch 42 | Train Loss: 0.2109 | LR: 5.00e-04
-Epoch 42 | Val Loss: 0.1693
-
-Epoch 43 | Train Loss: 0.2109 | LR: 5.00e-04
-Epoch 43 | Val Loss: 0.1701
-
-Epoch 44 | Train Loss: 0.2104 | LR: 5.00e-04
-Epoch 44 | Val Loss: 0.1706
-
-Epoch 45 | Train Loss: 0.2098 | LR: 5.00e-04
-Epoch 45 | Val Loss: 0.1696
-
-Epoch 46 | Train Loss: 0.2100 | LR: 5.00e-04
-Epoch 46 | Val Loss: 0.1702
-
-Epoch 47 | Train Loss: 0.2025 | LR: 2.50e-04
-Epoch 47 | Val Loss: 0.1632
-
-Epoch 48 | Train Loss: 0.2015 | LR: 2.50e-04
-Epoch 48 | Val Loss: 0.1623
-
-Epoch 49 | Train Loss: 0.2016 | LR: 2.50e-04
-Epoch 49 | Val Loss: 0.1619
-
-Epoch 50 | Train Loss: 0.2009 | LR: 2.50e-04
-Epoch 50 | Val Loss: 0.1628
-
-Final Test Loss (best val checkpoint): 0.1643
-
------------------------------------------------------------------------------
-
-#@title Hyperparameters
-num_nodes = 10 #@param # Could also be 10, 20, or 30!
 num_neighbors = -1  # Used by the dataset reader for interface compatibility.
 batch_size = 256 #@param
 hidden_dim = 128 #@param
@@ -685,3 +329,334 @@ Final Test Loss (best val checkpoint): 0.1475
 Mean score (tour_length / optimal_length - 1): 0.001229
 
 -----------------------------------------------------------------------------
+
+#@title Hyperparameters
+num_nodes = 20 #@param # Could also be 10, 20, or 30!
+num_neighbors = -1  #@param # Used by the dataset reader for interface compatibility.
+batch_size = 256 #@param
+hidden_dim = 128 #@param
+learning_rate = 1e-3
+max_epochs = 100
+batches_per_epoch = 10000
+accumulation_steps = 1
+transformer_num_heads = 8 #@param
+transformer_num_layers = 3 #@param
+transformer_dropout = 0.15 #@param
+transformer_ff_multiplier = 4 #@param
+transformer_enable_nested_tensor = False #@param
+grad_clip_norm = 1.0
+lr_factor = 0.5
+lr_patience = 3
+min_lr = 1e-6
+early_stop_patience = 8
+
+Device: cuda
+Number of parameters: 644864
+
+Epoch 1 | Train Loss: 0.3907 | LR: 1.00e-03
+Epoch 1 | Val Loss: 0.3095
+
+Epoch 2 | Train Loss: 0.3190 | LR: 1.00e-03
+Epoch 2 | Val Loss: 0.2771
+
+Epoch 3 | Train Loss: 0.3003 | LR: 1.00e-03
+Epoch 3 | Val Loss: 0.2593
+
+Epoch 4 | Train Loss: 0.2908 | LR: 1.00e-03
+Epoch 4 | Val Loss: 0.2455
+
+Epoch 5 | Train Loss: 0.2833 | LR: 1.00e-03
+Epoch 5 | Val Loss: 0.2426
+
+Epoch 6 | Train Loss: 0.2785 | LR: 1.00e-03
+Epoch 6 | Val Loss: 0.2345
+
+Epoch 7 | Train Loss: 0.2745 | LR: 1.00e-03
+Epoch 7 | Val Loss: 0.2301
+
+Epoch 8 | Train Loss: 0.2707 | LR: 1.00e-03
+Epoch 8 | Val Loss: 0.2356
+
+Epoch 9 | Train Loss: 0.2679 | LR: 1.00e-03
+Epoch 9 | Val Loss: 0.2286
+
+Epoch 10 | Train Loss: 0.2657 | LR: 1.00e-03
+Epoch 10 | Val Loss: 0.2262
+
+Epoch 11 | Train Loss: 0.2634 | LR: 1.00e-03
+Epoch 11 | Val Loss: 0.2218
+
+Epoch 12 | Train Loss: 0.2616 | LR: 1.00e-03
+Epoch 12 | Val Loss: 0.2173
+
+Epoch 13 | Train Loss: 0.2606 | LR: 1.00e-03
+Epoch 13 | Val Loss: 0.2198
+
+Epoch 14 | Train Loss: 0.2582 | LR: 1.00e-03
+Epoch 14 | Val Loss: 0.2179
+
+Epoch 15 | Train Loss: 0.2568 | LR: 1.00e-03
+Epoch 15 | Val Loss: 0.2176
+
+Epoch 16 | Train Loss: 0.2563 | LR: 1.00e-03
+Epoch 16 | Val Loss: 0.2127
+
+Epoch 17 | Train Loss: 0.2548 | LR: 1.00e-03
+Epoch 17 | Val Loss: 0.2159
+
+Epoch 18 | Train Loss: 0.2526 | LR: 1.00e-03
+Epoch 18 | Val Loss: 0.2159
+
+Epoch 19 | Train Loss: 0.2529 | LR: 1.00e-03
+Epoch 19 | Val Loss: 0.2149
+
+Epoch 20 | Train Loss: 0.2513 | LR: 1.00e-03
+Epoch 20 | Val Loss: 0.2119
+
+Epoch 21 | Train Loss: 0.2507 | LR: 1.00e-03
+Epoch 21 | Val Loss: 0.2104
+
+Epoch 22 | Train Loss: 0.2496 | LR: 1.00e-03
+Epoch 22 | Val Loss: 0.2061
+
+Epoch 23 | Train Loss: 0.2494 | LR: 1.00e-03
+Epoch 23 | Val Loss: 0.2057
+
+Epoch 24 | Train Loss: 0.2479 | LR: 1.00e-03
+Epoch 24 | Val Loss: 0.2085
+
+Epoch 25 | Train Loss: 0.2472 | LR: 1.00e-03
+Epoch 25 | Val Loss: 0.2083
+
+Epoch 26 | Train Loss: 0.2465 | LR: 1.00e-03
+Epoch 26 | Val Loss: 0.2095
+
+Epoch 27 | Train Loss: 0.2461 | LR: 1.00e-03
+Epoch 27 | Val Loss: 0.2050
+
+Epoch 28 | Train Loss: 0.2466 | LR: 1.00e-03
+Epoch 28 | Val Loss: 0.2061
+
+Epoch 29 | Train Loss: 0.2451 | LR: 1.00e-03
+Epoch 29 | Val Loss: 0.2018
+
+Epoch 30 | Train Loss: 0.2445 | LR: 1.00e-03
+Epoch 30 | Val Loss: 0.2043
+
+Epoch 31 | Train Loss: 0.2437 | LR: 1.00e-03
+Epoch 31 | Val Loss: 0.2021
+
+Epoch 32 | Train Loss: 0.2435 | LR: 1.00e-03
+Epoch 32 | Val Loss: 0.2015
+
+Epoch 33 | Train Loss: 0.2427 | LR: 1.00e-03
+Epoch 33 | Val Loss: 0.2047
+
+Epoch 34 | Train Loss: 0.2421 | LR: 1.00e-03
+Epoch 34 | Val Loss: 0.1990
+
+Epoch 35 | Train Loss: 0.2422 | LR: 1.00e-03
+Epoch 35 | Val Loss: 0.2061
+
+Epoch 36 | Train Loss: 0.2417 | LR: 1.00e-03
+Epoch 36 | Val Loss: 0.2016
+
+Epoch 37 | Train Loss: 0.2413 | LR: 1.00e-03
+Epoch 37 | Val Loss: 0.1994
+
+Epoch 38 | Train Loss: 0.2413 | LR: 1.00e-03
+Epoch 38 | Val Loss: 0.2013
+
+Epoch 39 | Train Loss: 0.2238 | LR: 5.00e-04
+Epoch 39 | Val Loss: 0.1817
+
+Epoch 40 | Train Loss: 0.2217 | LR: 5.00e-04
+Epoch 40 | Val Loss: 0.1827
+
+Epoch 41 | Train Loss: 0.2202 | LR: 5.00e-04
+Epoch 41 | Val Loss: 0.1816
+
+Epoch 42 | Train Loss: 0.2195 | LR: 5.00e-04
+Epoch 42 | Val Loss: 0.1815
+
+Epoch 43 | Train Loss: 0.2192 | LR: 5.00e-04
+Epoch 43 | Val Loss: 0.1795
+
+Epoch 44 | Train Loss: 0.2189 | LR: 5.00e-04
+Epoch 44 | Val Loss: 0.1790
+
+Epoch 45 | Train Loss: 0.2173 | LR: 5.00e-04
+Epoch 45 | Val Loss: 0.1788
+
+Epoch 46 | Train Loss: 0.2175 | LR: 5.00e-04
+Epoch 46 | Val Loss: 0.1802
+
+Epoch 47 | Train Loss: 0.2174 | LR: 5.00e-04
+Epoch 47 | Val Loss: 0.1772
+
+Epoch 48 | Train Loss: 0.2170 | LR: 5.00e-04
+Epoch 48 | Val Loss: 0.1784
+
+Epoch 49 | Train Loss: 0.2168 | LR: 5.00e-04
+Epoch 49 | Val Loss: 0.1760
+
+Epoch 50 | Train Loss: 0.2163 | LR: 5.00e-04
+Epoch 50 | Val Loss: 0.1781
+
+Epoch 51 | Train Loss: 0.2160 | LR: 5.00e-04
+Epoch 51 | Val Loss: 0.1767
+
+Epoch 52 | Train Loss: 0.2163 | LR: 5.00e-04
+Epoch 52 | Val Loss: 0.1798
+
+Epoch 53 | Train Loss: 0.2156 | LR: 5.00e-04
+Epoch 53 | Val Loss: 0.1759
+
+Epoch 54 | Train Loss: 0.2154 | LR: 5.00e-04
+Epoch 54 | Val Loss: 0.1776
+
+Epoch 55 | Train Loss: 0.2147 | LR: 5.00e-04
+Epoch 55 | Val Loss: 0.1770
+
+Epoch 56 | Train Loss: 0.2149 | LR: 5.00e-04
+Epoch 56 | Val Loss: 0.1759
+
+Epoch 57 | Train Loss: 0.2148 | LR: 5.00e-04
+Epoch 57 | Val Loss: 0.1761
+
+Epoch 58 | Train Loss: 0.2055 | LR: 2.50e-04
+Epoch 58 | Val Loss: 0.1654
+
+Epoch 59 | Train Loss: 0.2039 | LR: 2.50e-04
+Epoch 59 | Val Loss: 0.1655
+
+Epoch 60 | Train Loss: 0.2040 | LR: 2.50e-04
+Epoch 60 | Val Loss: 0.1652
+
+Epoch 61 | Train Loss: 0.2033 | LR: 2.50e-04
+Epoch 61 | Val Loss: 0.1659
+
+Epoch 62 | Train Loss: 0.2030 | LR: 2.50e-04
+Epoch 62 | Val Loss: 0.1662
+
+Epoch 63 | Train Loss: 0.2024 | LR: 2.50e-04
+Epoch 63 | Val Loss: 0.1651
+
+Epoch 64 | Train Loss: 0.2028 | LR: 2.50e-04
+Epoch 64 | Val Loss: 0.1648
+
+Epoch 65 | Train Loss: 0.2029 | LR: 2.50e-04
+Epoch 65 | Val Loss: 0.1648
+
+Epoch 66 | Train Loss: 0.2017 | LR: 2.50e-04
+Epoch 66 | Val Loss: 0.1641
+
+Epoch 67 | Train Loss: 0.2016 | LR: 2.50e-04
+Epoch 67 | Val Loss: 0.1635
+
+Epoch 68 | Train Loss: 0.2014 | LR: 2.50e-04
+Epoch 68 | Val Loss: 0.1639
+
+Epoch 69 | Train Loss: 0.2015 | LR: 2.50e-04
+Epoch 69 | Val Loss: 0.1634
+
+Epoch 70 | Train Loss: 0.2014 | LR: 2.50e-04
+Epoch 70 | Val Loss: 0.1637
+
+Epoch 71 | Train Loss: 0.2018 | LR: 2.50e-04
+Epoch 71 | Val Loss: 0.1646
+
+Epoch 72 | Train Loss: 0.2013 | LR: 2.50e-04
+Epoch 72 | Val Loss: 0.1642
+
+Epoch 73 | Train Loss: 0.2009 | LR: 2.50e-04
+Epoch 73 | Val Loss: 0.1632
+
+Epoch 74 | Train Loss: 0.2006 | LR: 2.50e-04
+Epoch 74 | Val Loss: 0.1630
+
+Epoch 75 | Train Loss: 0.2006 | LR: 2.50e-04
+Epoch 75 | Val Loss: 0.1637
+
+Epoch 76 | Train Loss: 0.2004 | LR: 2.50e-04
+Epoch 76 | Val Loss: 0.1625
+
+Epoch 77 | Train Loss: 0.2003 | LR: 2.50e-04
+Epoch 77 | Val Loss: 0.1632
+
+Epoch 78 | Train Loss: 0.2003 | LR: 2.50e-04
+Epoch 78 | Val Loss: 0.1623
+
+Epoch 79 | Train Loss: 0.2000 | LR: 2.50e-04
+Epoch 79 | Val Loss: 0.1624
+
+Epoch 80 | Train Loss: 0.2002 | LR: 2.50e-04
+Epoch 80 | Val Loss: 0.1621
+
+Epoch 81 | Train Loss: 0.2006 | LR: 2.50e-04
+Epoch 81 | Val Loss: 0.1626
+
+Epoch 82 | Train Loss: 0.2000 | LR: 2.50e-04
+Epoch 82 | Val Loss: 0.1634
+
+Epoch 83 | Train Loss: 0.1996 | LR: 2.50e-04
+Epoch 83 | Val Loss: 0.1628
+
+Epoch 84 | Train Loss: 0.1998 | LR: 2.50e-04
+Epoch 84 | Val Loss: 0.1624
+
+Epoch 85 | Train Loss: 0.1948 | LR: 1.25e-04
+Epoch 85 | Val Loss: 0.1567
+
+Epoch 86 | Train Loss: 0.1942 | LR: 1.25e-04
+Epoch 86 | Val Loss: 0.1573
+
+Epoch 87 | Train Loss: 0.1937 | LR: 1.25e-04
+Epoch 87 | Val Loss: 0.1563
+
+Epoch 88 | Train Loss: 0.1937 | LR: 1.25e-04
+Epoch 88 | Val Loss: 0.1570
+
+Epoch 89 | Train Loss: 0.1931 | LR: 1.25e-04
+Epoch 89 | Val Loss: 0.1578
+
+Epoch 90 | Train Loss: 0.1937 | LR: 1.25e-04
+Epoch 90 | Val Loss: 0.1579
+
+Epoch 91 | Train Loss: 0.1928 | LR: 1.25e-04
+Epoch 91 | Val Loss: 0.1548
+
+Epoch 92 | Train Loss: 0.1930 | LR: 1.25e-04
+Epoch 92 | Val Loss: 0.1556
+
+Epoch 93 | Train Loss: 0.1929 | LR: 1.25e-04
+Epoch 93 | Val Loss: 0.1562
+
+Epoch 94 | Train Loss: 0.1926 | LR: 1.25e-04
+Epoch 94 | Val Loss: 0.1561
+
+Epoch 95 | Train Loss: 0.1920 | LR: 1.25e-04
+Epoch 95 | Val Loss: 0.1555
+
+Epoch 96 | Train Loss: 0.1901 | LR: 6.25e-05
+Epoch 96 | Val Loss: 0.1537
+
+Epoch 97 | Train Loss: 0.1899 | LR: 6.25e-05
+Epoch 97 | Val Loss: 0.1539
+
+Epoch 98 | Train Loss: 0.1901 | LR: 6.25e-05
+Epoch 98 | Val Loss: 0.1534
+
+Epoch 99 | Train Loss: 0.1897 | LR: 6.25e-05
+Epoch 99 | Val Loss: 0.1531
+
+Epoch 100 | Train Loss: 0.1895 | LR: 6.25e-05
+Epoch 100 | Val Loss: 0.1528
+
+Final Test Loss (best val checkpoint): 0.1527
+Saved checkpoint: Models\transformer_tsp20.pt
+
+Device: cuda
+Checkpoint: Models\transformer_tsp20.pt
+Mean score: 0.008934
+Mean time: 0.030276s
